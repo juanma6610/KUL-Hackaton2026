@@ -1,0 +1,85 @@
+﻿Category,Subcategory,Tag,Description,Example 
+POS,Noun,n,Noun,bear
+POS,Noun,np,Proper noun,Juan
+POS,Verb,vblex,Lexical verb,run
+POS,Verb,vaux,Auxiliary verb,have
+POS,Verb,vbmod,Modal verb,can
+POS,Verb,vbser,"Verb ""to be""",is
+POS,Verb,vbhaver,"Verb ""to have""",have
+POS,Verb,vbdo,"Verb ""to do""",do
+POS,Modifier,adj,Adjective,big
+POS,Modifier,adv,Adverb,quickly
+POS,Function word,det,Determiner,the
+POS,Function word,predet,Pre-determiner,all
+POS,Function word,pr,Preposition,in/on
+POS,Function word,prn,Pronoun,he/she
+POS,Function word,prpers,Personal pronoun,she/her
+POS,Function word,cnjcoo,Coordinating conjunction,and
+POS,Function word,cnjsub,Subordinating conjunction,because
+POS,Function word,cnjadv,Adverbial conjunction,although
+POS,Other POS,num,Numeral,five
+POS,Other POS,ij,Interjection,oh
+POS,Other POS,preadv,Preadverb,not
+POS,Other POS,sent,Sentence marker,
+Morphology,Number,sg,Singular,dog
+Morphology,Number,pl,Plural,dogs
+Morphology,Number,sp,Singular / plural,sheep
+Morphology,Number,ND,Number undetermined,fish
+Morphology,Gender,m,Masculine,actor
+Morphology,Gender,f,Feminine,actress
+Morphology,Gender,nt,Neuter,table
+Morphology,Gender,mf,Masculine / feminine,student
+Morphology,Gender,GD,Gender undetermined,person
+Morphology,Person,p1,First person,I run
+Morphology,Person,p2,Second person,you run
+Morphology,Person,p3,Third person,she runs
+Morphology,Case,gen,Genitive,John's book
+Morphology,Case,loc,Location,at home
+Morphology,Definiteness,def,Definite,the dog
+Morphology,Definiteness,ind,Indefinite,a dog
+Morphology,Animacy,aa,Animate,dog
+Morphology,Animacy,nn,Inanimate,chair
+Morphology,Animacy,an,Animate / inanimate,baby
+Morphology,Tense,pres,Present tense,I run
+Morphology,Tense,pri,Present indicative,I run
+Morphology,Tense,prs,Present subjunctive,that he run
+Morphology,Tense,past,Past,I ran
+Morphology,Tense,ifi,Preterite indicative,I ate
+Morphology,Tense,pii,Imperfect indicative,I was eating
+Morphology,Tense,fti,Future indicative,I will run
+Morphology,Tense,fts,Future subjunctive,if he run
+Morphology,Tense,cni,Conditional,I would run
+Morphology,Tense,imp,Imperative,Run!
+Morphology,Tense,pis,Imperative subjunctive,let him run
+Morphology,Verb form,inf,Infinitive,to run
+Morphology,Verb form,ger,Gerund,running
+Morphology,Verb form,pp,Past participle,eaten
+Morphology,Verb form,pprs,Present participle,running
+Morphology,Verb form,pron,Pronominal,wash oneself
+Morphology,Verb form,subs,Substantive,the running
+Morphology,Degree,comp,Comparative,bigger
+Morphology,Degree,sup,Superlative,biggest
+Syntax,Role,subj,Subject,"""She"" runs"
+Syntax,Role,obj,Object,"I saw ""him"""
+Syntax,Clitic,pro,Proclitic,he will not go
+Syntax,Clitic,enc,Enclitic,give it to me
+Syntax,Verb feature,sep,Separable verb,turn off
+Syntax,Reference,ref,Reflexive,She hurt herself
+Syntax,Reference,rel,Relative,"The book ""that"" I read"
+Syntax,Reference,dem,Demonstrative,this book
+Syntax,Reference,pos,Possessive,my house
+Syntax,Reference,qnt,Quantifier,many students
+Syntax,Reference,itg,Interrogative,Which book?
+Syntax,Descriptor,ord,Ordinal,first place
+Syntax,Descriptor,sint,Synthetic,better
+Syntax,Descriptor,tn,Tonic,me
+Syntax,Descriptor,atn,Atonic,him
+Syntax,Descriptor,detnt,Determiner neuter,it
+Syntax,Proper name,ant,Anthroponym,John
+Syntax,Proper name,cog,Cognomen,Smith
+Punctuation,Mark,cm,Comma,","
+Punctuation,Mark,apos,Apostrophe,'
+Punctuation,Mark,guio,Hyphen,-
+Punctuation,Mark,lpar,Left parenthesis,(
+Punctuation,Mark,rpar,Right parenthesis,)
+Punctuation,Mark,lquest,Left question mark,¿

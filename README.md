@@ -107,13 +107,7 @@ Where to look for code
 
 ## Dataset Pipeline (`src/`)
 
-These two scripts process the raw Duolingo learning-trace dataset into a structured, morphologically-enriched CSV ready for modelling.
-
 ### Prerequisites
-
-```bash
-pip install pandas numpy
-```
 
 You also need the raw Duolingo dataset file **`learning_traces.13m.csv`** (~13 M rows).
 Place it in the same directory from which you run the scripts, or adjust the `INPUT_CSV` constant in `build_duo_data.py`.
@@ -132,20 +126,6 @@ Reads `learning_traces.13m.csv` in memory-efficient chunks (default 500 000 rows
 # run from the directory containing learning_traces.13m.csv
 python src/build_duo_data.py
 ```
-
-Progress is printed per chunk:
-
-```
-Reading  : learning_traces.13m.csv  (chunks of 500,000)
-Writing  : duo_data.csv
-
-  chunk    1 | rows      500,000 | chunk 4.2s | total  4s | ~118,000 rows/s
-  ...
-Done! 12,854,284 rows → 'duo_data.csv'  (112s total)
-```
-
-Tune memory usage by changing `CHUNK_SIZE` at the top of the file.
-
 **Columns added to the output** (on top of all original columns):
 
 | Column | Description |
@@ -163,53 +143,8 @@ Tune memory usage by changing `CHUNK_SIZE` at the top of the file.
 | `pronoun_type` | `reflexive` / `personal` / `object` / `subject` / … |
 | `adj_declension` | German-style declension: `strong` / `weak` / `uninflected` |
 
----
-
-### `src/lexeme_parser.py` — Row-level parser & diagnostics
-
-A more detailed, row-by-row parser. Use it to inspect a small sample or import its functions into notebooks and model scripts.
-
-**Run standalone** (prints a diagnostic summary on 3 000 rows):
-
-```bash
-# run from the directory containing learning_traces.13m.csv
-python src/lexeme_parser.py
-```
-
-Output includes: POS distribution, per-POS subcategory breakdown, tense/mood counts for verbs, gender distribution for nouns and adjectives, and 15 sample parsed rows.
-
-**Import into your own code:**
-
-```python
-from src.lexeme_parser import parse_lexeme, enrich_dataframe
-import pandas as pd
-
-# Parse a single lexeme string
-result = parse_lexeme("lernt/lernen<vblex><pri><p3><sg>")
-# → {'surface_form': 'lernt', 'lemma': 'lernen', 'pos_label': 'verb_lexical',
-#    'tense': 'present_indicative', 'person': '3rd_person', 'number': 'singular', …}
-
-# Enrich a DataFrame that contains a 'lexeme_string' column
-df = pd.read_csv("learning_traces.13m.csv", nrows=5000)
-df_enriched = enrich_dataframe(df)
-print(df_enriched[["lexeme_string", "pos_label", "tense", "gender"]].head())
-```
-
-**Lexeme string format** (Apertium convention):
-
-```
-surface_form/lemma<POS><tense><person><number>…
-```
-
-Example: `estudia/estudiar<vblex><pri><p3><sg>`
-→ surface=`estudia`, lemma=`estudiar`, POS=`verb_lexical`, tense=`present_indicative`, person=`3rd_person`, number=`singular`
-
----
-
 ### Which script to use
 
 | Goal | Script |
 |---|---|
 | Build the full `duo_data.csv` from scratch | `src/build_duo_data.py` |
-| Inspect / debug lexeme parsing on a small sample | `src/lexeme_parser.py` (standalone) |
-| Use the parser inside a notebook or model script | `from src.lexeme_parser import parse_lexeme, enrich_dataframe` |

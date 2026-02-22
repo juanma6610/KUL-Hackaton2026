@@ -1,150 +1,121 @@
-# KUL-Hackaton2026 — Project Readme (Updated)
+# 🦉 Duolingo Memory Engine — KUL-Hackaton2026
 
-This repository collects code, notebooks and data for experiments with Duolingo-style spaced repetition models (Half-Life Regression, Multiscale Context Model, and an XGBoost baseline) and tooling to run, evaluate and visualize them.
-
-Summary of new / updated features (detailed and specific)
-- Multiscale Context Model (MCM)
-  - Implementation: [`hlr.model1.MultiscaleContextModel`](hlr/model1.py)
-  - Key constructor params: `mu=0.01`, `nu=1.05`, `xi=0.9`, `N=100`, `eps_r=9.0`. The model instantiates exponentially spaced time scales tau and normalized weights gamma for N integrators.
-  - Methods: `decay(t)`, `get_strengths()`, `predict(t)` and `study(t, recalled)` — see [`hlr/model1.py`](hlr/model1.py) for full implementation and inline docstrings.
-  - Usage in pipeline: produced per-record MCM recall predictions via [`hlr.model1.generate_mcm_features`](hlr/model1.py), which is vectorized (NumPy arrays) and maintains per (user,lexeme) state for speed.
-
-- XGBoost Phase‑2 Baseline (half-life regression target)
-  - Data preparation: [`hlr.model1.get_xgboost_data`](hlr/model1.py)
-    - Reads `data/SpacedRepetitionData.csv` ([data/SpacedRepetitionData.csv](data/SpacedRepetitionData.csv)).
-    - Feature engineering includes:
-      - Temporal features: `hour_of_day`, `day_of_week`, `time_lag_days`, `log_delta`
-      - Language pair: `lang` (e.g., `ui_language->learning_language`)
-      - MCM baseline: `mcm_predicted_p`
-      - Accuracy and counts: `historical_accuracy`, `user_global_accuracy`, `right = sqrt(1 + history_correct)`, `wrong = sqrt(1 + (history_seen - history_correct))`
-      - Morphology: `pos_tag` extracted from `lexeme_string`
-    - Casts categorical columns for native XGBoost categorical handling (`lang`, `pos_tag`).
-    - Performs fast 90/10 train/test split.
-  - Target transform (train): half-life computed as
-    - $h = -\dfrac{t}{\log_2 p}$ where $p$ is the observed recall and $t$ is `time_lag_days` (see code in [`hlr.model1.train_xgboost_baseline`](hlr/model1.py)).
-    - Clipped to [`hlr.model1.MIN_HALF_LIFE`](hlr/model1.py) and [`hlr.model1.MAX_HALF_LIFE`](hlr/model1.py).
-  - Model architecture and training:
-    - Model: `xgb.XGBRegressor` with explicit params: `tree_method="hist"`, `enable_categorical=True`, `n_estimators=1000`, `learning_rate=0.01`, `max_depth=6`, `early_stopping_rounds=50`, `random_state=42` — see [`hlr.model1.train_xgboost_baseline`](hlr/model1.py).
-    - Fit uses `eval_set=[(X_train, h_train), (X_test, h_test)]` and `verbose=50`.
-  - Predictions:
-    - Predicts half-life `h_pred`, clipped to `[MIN_HALF_LIFE, MAX_HALF_LIFE]`.
-    - Converts back to probability: $p = 2^{-t/h}$ (code: `p_pred = 2.0 ** (-X_test['time_lag_days'] / h_pred)`).
-    - Post-clipping of probabilities to `[0.0001, 0.9999]`.
-  - Metrics and reporting:
-    - MAE for half-life (days): `mae_h = mean_absolute_error(h_test, h_pred)`
-    - Spearman correlation for half-life and p: `spearmanr(...)`
-    - MAE for probability predictions and printed Phase 2 summary — see output example in [`hlr/xgboost.ipynb`](hlr/xgboost.ipynb) and the helper [`hlr.model1.train_xgboost_baseline`](hlr/model1.py).
-
-- Visualization / Pitch-deck asset generation
-  - SHAP feature importance and dependence plots are produced by [`hlr.model1.generate_pitch_deck_visuals`](hlr/model1.py) and in the notebook [`hlr/xgboost.ipynb`](hlr/xgboost.ipynb).
-  - Example saved files: `slide1_feature_importance.png`, `slide2_circadian_rhythm.png` (hour_of_day dependence) — see the SHAP code block in [`hlr/xgboost.ipynb`](hlr/xgboost.ipynb).
-
-- Streamlit demo app
-  - GUI: [`app.py`](app.py)
-    - Loads saved XGBoost model with `@st.cache_resource` via [`app.load_model`](app.py) which calls `xgb.XGBRegressor().load_model("xgboost_baseline.json")`.
-    - Input panel includes categorical dropdowns for `lang`, sliders and numeric inputs for `time_lag_days`, `history_seen`, `history_correct`, `pos_tag`, etc.
-    - Prepares input DataFrame matching the training features and performs dtype casting for categorical features (`lang`, `pos_tag`) before prediction.
-    - Prediction flow: compute `h_pred`, clip, convert to `p_pred = 2^{-t/h_pred}`, display metrics and interactive forgetting curve with Plotly (`plotly.graph_objects`).
-    - Enforces basic input logic in `enforce_math_logic()` to keep `history_correct <= history_seen`.
-  - Model used by app: saved model files `xgboost_baseline.json` and `xgboost_baseline0.001.json` (produced by training scripts/notebooks) — check [`hlr/model1.py`](hlr/model1.py) and [`hlr/xgboost.ipynb`](hlr/xgboost.ipynb).
-
-
-
-- Classic HLR / SpacedRepetitionModel scripts (trainable baselines)
-  - Two implementations:
-    - Legacy script: [`hlr/experiment.py`](hlr/experiment.py) — Python reimplementation of Duolingo HLR with command-line usage.
-    - Root-level `experiment.py` (original from repo): [`experiment.SpacedRepetitionModel`](experiment.py).
-  - CLI flags in both: `-b` (omit bias), `-l` (omit lexeme features), `-t` (omit half-life term), `-m <method>` (hlr|lr|leitner|pimsleur), `-x <max_lines>` for dev truncation. See parsing logic in [`experiment.py`](experiment.py) and [`hlr/model1.py` argparse block] (script entrypoint).
- 
-
-- Evaluation tooling (R)
-  - R evaluation script: [`hlr/evaluation.r`](hlr/evaluation.r) exposing `sr_evaluate(preds_file)` which computes:
-    - MAE significance test (Welch t-test),
-    - AUC via `pROC::roc`,
-    - Wilcoxon rank-sum test,
-    - Spearman half-life correlation.
-  - See included commented example outputs in [`hlr/evaluation.r`](hlr/evaluation.r).
-
-- Notebooks (EDA and experiments)
-  - Exploratory data analysis and baseline fitting: [`edaSRD.ipynb`](edaSRD.ipynb) and [`duolingo-exploratory-data-analysis.ipynb`](duolingo-exploratory-data-analysis.ipynb).
-  - XGBoost training, diagnostics, SHAP visuals and saved assets: [`hlr/xgboost.ipynb`](hlr/xgboost.ipynb).
-
-- Misc / infra
-  - Dataset: [data/SpacedRepetitionData.csv](data/SpacedRepetitionData.csv)
-  - Requirements: [requirements.txt](requirements.txt)
-  - Project-level README for the HLR original repo: [hlr/README.md](hlr/README.md)
-  - Results folder usage: training and evaluation writes are placed under `results/` by the CLI entrypoints (see `experiment.py` and [`hlr/experiment.py`](hlr/experiment.py)).
-
-How to run (concise steps)
-1. Prepare environment:
-   - Install deps: `pip install -r requirements.txt` ([requirements.txt](requirements.txt)).
-2. Generate MCM features and train XGBoost (two options):
-   - Notebook: open [`hlr/xgboost.ipynb`](hlr/xgboost.ipynb) and run cells; or
-   - Script: run `python hlr/model1.py data/SpacedRepetitionData.csv` (script entrypoint in [`hlr/model1.py`](hlr/model1.py)) to call `get_xgboost_data` and `train_xgboost_baseline`.
-3. Run the demo app:
-   - Ensure `xgboost_baseline.json` exists (produced by training).
-   - Launch: `streamlit run app.py` ([app.py](app.py)).
-4. Train HLR baselines:
-   - `python experiment.py -m hlr data/SpacedRepetitionData.csv` ([experiment.py](experiment.py)) or use [`hlr/experiment.py`](hlr/experiment.py) variant.
-5. Evaluate predictions:
-   - Use `Rscript -e "source('hlr/evaluation.r'); sr_evaluate('results/<preds_file>')"` or run interactively in R using [`hlr/evaluation.r`](hlr/evaluation.r).
-
-Important equations and clipping
-- Probability decay used by model: $p = 2^{-t/h}$ (used to transform predicted half-life to recall probability).
-- Half-life target transform: $h = -\dfrac{t}{\log_2 p}$ (clipped to min / max half-life constants in [`hlr/model1.py`](hlr/model1.py) and [`experiment.py`](experiment.py)).
-- Constants: [`hlr.model1.MIN_HALF_LIFE`](hlr/model1.py), [`hlr.model1.MAX_HALF_LIFE`](hlr/model1.py) and their equivalents in `experiment.py` ([experiment.py](experiment.py), [`hlr/experiment.py`](hlr/experiment.py)).
-
-Where to look for code
-- Core MCM + XGBoost pipeline: [`hlr/model1.py`](hlr/model1.py) — primary entrypoint for feature generation, training and visualization.
-- Notebook walkthrough & reproducible run: [`hlr/xgboost.ipynb`](hlr/xgboost.ipynb).
-- Streamlit demo: [`app.py`](app.py).
-- Legacy HLR scripts & CLI: [`experiment.py`](experiment.py) and [`hlr/experiment.py`](hlr/experiment.py).
-- Evaluation script (R): [`hlr/evaluation.r`](hlr/evaluation.r).
-- Data: [data/SpacedRepetitionData.csv](data/SpacedRepetitionData.csv).
-- Dataset descriptions: [datasets/README_2020StapleSharedTaskData.txt](datasets/README_2020StapleSharedTaskData.txt).
+This repository contains an advanced memory modeling pipeline for Duolingo-style spaced repetition. It implements a hybrid architecture combining the **Multiscale Context Model (MCM)** from cognitive science with **XGBoost** for high-precision recall prediction and linguistic feature integration.
 
 ---
 
-## Dataset Pipeline (`src/`)
+## 📂 Project Structure
 
-### Prerequisites
+The project is organized into a modular package format for production-ready experimentation.
 
-You also need the raw Duolingo dataset file **`learning_traces.13m.csv`** (~13 M rows).
-Place it in the same directory from which you run the scripts, or adjust the `INPUT_CSV` constant in `build_duo_data.py`.
+### 🚀 Entry Points
+- **[`train.py`](train.py)**: The primary CLI entry point for the training pipeline.
+- **[`app.py`](app.py)**: The interactive Streamlit demo app with a Duolingo-inspired theme and SHAP explainability.
 
-> `duo_data.csv` is listed in `.gitignore` because it is ~1.8 GB — regenerate it locally after cloning.
+### 📦 Core Package (`src/`)
+- **[`mcm.py`](src/mcm.py)**: Implementation of the **Multiscale Context Model**. Maintains stateful memory simulations.
+- **[`lexeme_parser.py`](src/lexeme_parser.py)**: Sophisticated NLP parser for Duolingo lexeme strings. Extracts 15+ morphological categories.
+- **[`data_pipeline.py`](src/data_pipeline.py)**: Handles feature engineering and prepares the training/testing matrices.
+- **[`model_trainer.py`](src/model_trainer.py)**: High-performance XGBoost training logic with **Optuna** support.
+- **[`visuals.py`](src/visuals.py)**: Generates SHAP importance and circadian rhythm plots.
+- **[`preprocess.py`](src/preprocess.py)**: Utility to build the "Gold Dataset" (Parquet) from raw CSVs for lightning-fast training.
+- **[`build_duo_data.py`](src/build_duo_data.py)**: Vectorized batch enricher for the full 13M row dataset.
+- **[`config.py`](src/config.py)**: Centralized configuration and file paths.
+
+### 🏛️ Legacy & Research
+- **[`hlr/`](hlr/)**: Contains legacy Half-Life Regression scripts and evaluation utilities.
+- **[`eda/`](eda/)**: Notebooks for Exploratory Data Analysis.
 
 ---
 
-### `src/build_duo_data.py` — Full dataset builder
+## 📊 Dataset Pipeline
 
-Reads `learning_traces.13m.csv` in memory-efficient chunks (default 500 000 rows), parses the `lexeme_string` column into grammatical features using vectorised pandas regex, and streams the result to `duo_data.csv`.
+To fully utilize the pipeline, you need the raw Duolingo dataset (e.g., `learning_traces.13m.csv`). By default, the scripts expect this file in the `data/` directory.
 
-**Run:**
+> [!NOTE]
+> `duo_data.csv` and `processed_features.parquet` are git-ignored due to their size (~1.8 GB). You should regenerate them locally using the steps below.
+
+### 1. Build the Enriched Dataset
+`src/build_duo_data.py` reads the raw traces in memory-efficient chunks, parses the `lexeme_string` using vectorized regex, and produces an enriched CSV.
 
 ```bash
-# run from the directory containing learning_traces.13m.csv
+# Run the batch builder
 python src/build_duo_data.py
 ```
-**Columns added to the output** (on top of all original columns):
+
+**Linguistic Features Extracted:**
 
 | Column | Description |
-|---|---|
-| `surface_form` | The inflected word form (before `/`) |
-| `lemma` | Dictionary / base form (between `/` and first `<`) |
-| `pos_label` | Part of speech (`verb_lexical`, `noun`, `adjective`, …) |
-| `tense` | Tense/mood (`present_indicative`, `past_participle`, `infinitive`, …) |
-| `person` | Grammatical person (`1st_person`, `2nd_person`, `3rd_person`) |
-| `number` | `singular` / `plural` / `singular_or_plural` |
-| `gender` | `masculine` / `feminine` / `neuter` / `masculine_or_feminine` |
-| `case` | `nominative` / `accusative` / `dative` / `genitive` / … |
-| `definiteness` | `definite` / `indefinite` / `demonstrative` / `possessive` / … |
-| `degree` | Adjective degree: `comparative` / `superlative` |
-| `pronoun_type` | `reflexive` / `personal` / `object` / `subject` / … |
-| `adj_declension` | German-style declension: `strong` / `weak` / `uninflected` |
+| :--- | :--- |
+| `surface_form` | The actual word seen by the student (e.g., *lernt*). |
+| `lemma` | The dictionary base form (e.g., *lernen*). |
+| `pos_label` | Part of Speech (Noun, Verb, Adjective, etc.). |
+| `tense` | Grammatical tense (Present, Past, Future, etc.). |
+| `person` | 1st, 2nd, or 3rd person. |
+| `number` | Singular or Plural. |
+| `gender` | Masculine, Feminine, or Neuter. |
+| `case` | Nominative, Accusative, Dative, etc. |
+| `definiteness` | Definite, Indefinite, etc. |
+| `degree` | Adjective degree (Comparative, Superlative). |
+| `pronoun_type` | Reflexive, Personal, Object, etc. |
+| `adj_declension` | Strong, Weak, or Uninflected. |
 
-### Which script to use
+### 2. Pre-process for Speed (Optional)
+Use `preprocess.py` to convert the CSV into a Parquet "Gold Dataset". This significantly accelerates the training phase.
 
-| Goal | Script |
-|---|---|
-| Build the full `duo_data.csv` from scratch | `src/build_duo_data.py` |
+```bash
+python src/preprocess.py
+```
+
+## 🛠️ How to Run
+
+### 1. Environment Setup
+```bash
+pip install -r requirements.txt
+```
+
+### 2. Training the Model
+**Standard Training:**
+```bash
+python train.py data/SpacedRepetitionData.csv
+```
+
+**Optuna Hyperparameter Search:**
+```bash
+python train.py data/SpacedRepetitionData.csv --optuna --trials 100
+```
+
+### 3. Launch the App
+```bash
+streamlit run app.py
+```
+
+---
+
+## 🧠 Model Methodology
+
+The engine uses a two-stage hybrid approach to model human memory decay:
+
+1.  **Cognitive Stage (MCM)**: Simulates the underlying strength of a student's memory based on their practice history across multiple time scales.
+2.  **Machine Learning Stage (XGBoost)**: Refines the cognitive prediction by factoring in linguistic complexity, circadian rhythms, and global user performance.
+
+### Features Included
+-   **Cognitive**: MCM recall probability baseline.
+-   **Linguistic Depth**: POS labels, tense, person, number, gender, case, definiteness, and degree.
+-   **Temporal**: Hour of day and day of week (rhythm effects).
+-   **History**: Historical accuracy, total success/failures (sqrt transformed).
+
+### Model Validity & Explainability
+-   **Chronological Validity**: GroupKFold splitting ensures the model is evaluated on unseen users, preventing data leakage.
+-   **Metrics**: Spearman Correlation (on $h$) and MAE (Mean Absolute Error on recall probability $p$).
+-   **Explainability**: Full SHAP integration allows us to visualize exactly why a student is likely to forget a specific word.
+
+## 📊 Results & Artifacts
+- **Models**: Saved in the `models/` directory.
+- **Visuals**: SHAP analysis plots are saved automatically after training for use in presentations.
+
+---
+
+## 📜 Credits
+Developed for **KU Leuven MAI Hackathon 2026**.
+Based on the Duolingo Spaced Repetition Dataset.

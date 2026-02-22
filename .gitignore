@@ -1,7 +1,9 @@
 #Datasets
-data/
-#Models
+data/*
+#!data/processed_features.parquet
+#Models         
 models/
+
 .vscode/
 
 # Byte-compiled / optimized / DLL files

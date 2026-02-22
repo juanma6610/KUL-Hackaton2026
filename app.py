@@ -3,7 +3,7 @@ import pandas as pd
 import numpy as np
 import xgboost as xgb
 import matplotlib.pyplot as plt
-from hlr.model1 import MultiscaleContextModel  
+from src.mcm import MultiscaleContextModel  
 import plotly.graph_objects as go
 import shap
 import matplotlib

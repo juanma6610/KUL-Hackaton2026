@@ -13,12 +13,13 @@ def main():
     parser.add_argument('--no-cache', action="store_true", default=False, help="Ignore MCM cache")
     args = parser.parse_args()
 
-    print("🚀 Starting Cram-Buster Training Pipeline...")
+    print("🚀 Starting Training Pipeline...")
+    print(args)
     
     use_cache = not args.no_cache
     
     # 1. Data Pipeline
-    X_train, X_test, y_train, y_test = get_xgboost_data(args.input_file, args.user_fraction, use_cache)
+    X_train, X_test, y_train, y_test = get_xgboost_data(args.input_file, args.user_fraction)
     
     # 2. Model Training
     model = train_xgboost_baseline(X_train, X_test, y_train, y_test, args.optuna, args.n_trials)

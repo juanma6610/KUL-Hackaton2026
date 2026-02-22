@@ -8,7 +8,7 @@ from src.config import MIN_HALF_LIFE, MAX_HALF_LIFE
 
 optuna.logging.set_verbosity(optuna.logging.WARNING)
 
-def train_xgboost_baseline(X_train, X_test, y_train, y_test, use_optuna=False, n_trials=30):
+def train_xgboost_baseline(X_train, X_test, y_train, y_test, use_optuna=False, n_trials=300):
     print("Initializing XGBoost Regressor (Phase 2 Baseline)...")
     
     # Target Transformation: Calculate 'h' for training
@@ -27,16 +27,16 @@ def train_xgboost_baseline(X_train, X_test, y_train, y_test, use_optuna=False, n
             params = {
                 "tree_method": "hist",
                 "enable_categorical": True,
-                "n_estimators": trial.suggest_int("n_estimators", 200, 2000, step=100),
+                "n_estimators": trial.suggest_int("n_estimators", 200, 8000, step=100),
                 "learning_rate": trial.suggest_float("learning_rate", 0.005, 0.1, log=True),
-                "max_depth": trial.suggest_int("max_depth", 3, 9),
+                "max_depth": trial.suggest_int("max_depth", 3, 12),
                 "subsample": trial.suggest_float("subsample", 0.6, 1.0),
                 "colsample_bytree": trial.suggest_float("colsample_bytree", 0.5, 1.0),
-                "min_child_weight": trial.suggest_int("min_child_weight", 1, 10),
+                "min_child_weight": trial.suggest_int("min_child_weight", 1, 20),
                 "reg_alpha": trial.suggest_float("reg_alpha", 1e-8, 1.0, log=True),
                 "reg_lambda": trial.suggest_float("reg_lambda", 1e-8, 1.0, log=True),
                 "random_state": 42,
-                "early_stopping_rounds": 30,
+                "early_stopping_rounds": 50,
             }
             model = xgb.XGBRegressor(**params)
             model.fit(

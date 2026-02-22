@@ -23,8 +23,8 @@ import pandas as pd
 # ---------------------------------------------------------------------------
 # Config
 # ---------------------------------------------------------------------------
-INPUT_CSV  = "learning_traces.13m.csv"
-OUTPUT_CSV = "duo_data.csv"
+INPUT_CSV  = "data/SpacedRepetitionData.csv"
+OUTPUT_CSV = "data/duo_data.csv"
 CHUNK_SIZE = 500_000        # rows per chunk — tune up/down as needed
 
 # ---------------------------------------------------------------------------

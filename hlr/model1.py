@@ -256,7 +256,7 @@ def train_xgboost_baseline(X_train, X_test, y_train, y_test):
     model = xgb.XGBRegressor(
         tree_method="hist", 
         enable_categorical=True,
-        n_estimators=5000,
+        n_estimators=200000,
         learning_rate=0.001,
         max_depth=6,
         early_stopping_rounds=50,

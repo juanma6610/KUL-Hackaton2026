@@ -312,4 +312,4 @@ if __name__ == "__main__":
         os.makedirs('results/')
     model.dump_weights('results/'+filebase+'.weights')
     model.dump_predictions('results/'+filebase+'.preds', testset)
-    # model.dump_detailed_predictions('results/'+filebase+'.detailed', testset)
+    model.dump_detailed_predictions('results/'+filebase+'.detailed', testset)

@@ -8,4 +8,3 @@
 - Do transformations with the df and upload it to the repo (Stefanos)
 - Understand the Half Life Regression Model
 
-![alt text](image.png)

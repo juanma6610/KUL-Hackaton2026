@@ -45,7 +45,7 @@ def get_xgboost_data(processed_file_path="data/processed_features.parquet", user
     #Delta represents the time since last practice in days, which is critical for the forgetting curve
     #DECIDE WHICH ONE TO KEEP: raw delta or log delta (log can help with skew but may lose interpretability)
     X['time_lag_days'] = df['delta'] / (60 * 60 * 24)
-    X['log_delta'] = np.log1p(df['delta'] / (60 * 60 * 24))
+    #X['log_delta'] = np.log1p(df['delta'] / (60 * 60 * 24))
 
     # Combine languages into a single feature
     X['lang'] = df['ui_language'] + "->" + df['learning_language']
@@ -57,7 +57,7 @@ def get_xgboost_data(processed_file_path="data/processed_features.parquet", user
     X['historical_accuracy'] = df['historical_accuracy'] # Micro: Their skill on this word
     X['user_global_accuracy'] = df['user_global_accuracy'] # Macro: Their overall app skill
     X['right'] = np.sqrt(1 + df['history_correct'])  #Raw success count (sqrt to reduce skew)
-    X['wrong'] = np.sqrt(1 + (df['history_seen'] - df['history_correct']))  #Raw failure count (sqrt authors mentioned
+    X['wrong'] = np.sqrt(1 + (df['history_seen'] - df['history_correct']))  #Raw failure count (sqrt authors mentioned it works better)
 
     # --- NEW: Full grammatical feature set from enrich_chunk ---
     # pos_label: descriptive POS ("noun", "verb_lexical", "adjective", …)

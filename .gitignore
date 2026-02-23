@@ -4,6 +4,9 @@ data/*
 #Models         
 models/
 
+#Result
+results/
+
 .vscode/
 
 # Byte-compiled / optimized / DLL files

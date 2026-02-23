@@ -60,7 +60,7 @@ st.markdown("""
 @st.cache_resource
 def load_model():
     model = xgb.XGBRegressor()
-    model.load_model("xgboost_baseline.json") 
+    model.load_model("models/xgboost_baseline0.001.json") 
     return model
 
 model = load_model()

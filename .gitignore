@@ -217,3 +217,8 @@ marimo/_static/
 marimo/_lsp/
 __marimo__/
 datasets/duo_data.csv
+# datasets/struggling_learners_all_pairs.csv
+
+# lexemes/lex_ref.csv.csv
+*.zip
+

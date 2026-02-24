@@ -10,6 +10,8 @@ CORS(app)
 model = xgb.XGBRegressor()
 model.load_model("../models/xgboost_baseline0.001.json")
 
+CATEGORICAL_COLS = ['lang', 'pos_label', 'tense', 'person', 'grammatical_number', 'gender', 'case', 'definiteness', 'degree']
+
 @app.route('/predict', methods=['POST'])
 def predict():
     data = request.json
@@ -35,7 +37,7 @@ def predict():
         'degree': [data['degree']],
     })
     
-    for col in ['lang', 'pos_label', 'tense', 'person', 'grammatical_number', 'gender', 'case', 'definiteness', 'degree']:
+    for col in CATEGORICAL_COLS:
         df[col] = df[col].astype('category')
     
     try:
@@ -44,8 +46,8 @@ def predict():
             if f not in df.columns:
                 df[f] = 0
         df = df[features]
-    except:
-        pass
+    except Exception as e:
+        print(f"Feature alignment warning: {e}")
     
     h = np.clip(model.predict(df)[0], 15.0 / (24 * 60), 274.0)
     return jsonify({'h_pred': float(h)})

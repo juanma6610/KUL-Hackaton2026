@@ -1,454 +1,478 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>🦉 Duolingo Memory Engine</title>
-  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-  <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
-  <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #fafafa; color: #1a1a1a; }
-    .app { min-height: 100vh; max-width: 1400px; margin: 0 auto; padding: 40px; }
-    .controls { background: #fff; padding: 24px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); margin-bottom: 24px; }
-    .controls-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; }
-    h1 { color: #58cc02; font-size: 2rem; margin-bottom: 24px; font-weight: 700; letter-spacing: -0.5px; text-align: center; }
-    h2 { color: #1a1a1a; font-size: 1.25rem; margin: 24px 0 16px; font-weight: 600; }
-    h3 { color: #58cc02; font-size: 0.875rem; margin: 20px 0 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
-    .subtitle { color: #666; margin-bottom: 24px; font-size: 0.9rem; }
-    .divider { border: none; border-top: 1px solid #eee; margin: 20px 0; }
-    label { display: block; color: #4a4a4a; font-size: 0.8rem; margin: 12px 0 6px; font-weight: 500; }
-    select, input[type="number"] { width: 100%; padding: 8px 10px; border: 1px solid #ddd; border-radius: 4px; font-size: 0.875rem; transition: border 0.2s; }
-    select:focus, input:focus { outline: none; border-color: #58cc02; }
-    input[type="range"] { width: 100%; height: 4px; }
-    .range-value { color: #58cc02; font-weight: 600; }
-    .results-section { display: grid; grid-template-columns: 350px 1fr; gap: 24px; margin: 24px 0; }
-    .metrics-col { display: flex; flex-direction: column; gap: 16px; }
-    .card { background: #fff; border: 1px solid #eee; border-radius: 8px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.04); text-align: center; }
-    .metric-label { color: #888; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
-    .metric-value { color: #1a1a1a; font-size: 2rem; font-weight: 700; }
-    .predict-btn { background: #58cc02; color: white; border: none; padding: 12px 32px; border-radius: 8px; font-size: 1rem; font-weight: 600; cursor: pointer; margin: 16px auto 0; display: block; transition: background 0.2s; }
-    .predict-btn:hover { background: #4caf00; }
-    .predict-btn:active { transform: scale(0.98); }
-    .recall-card { text-align: center; padding: 32px 20px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
-    .recall-value { font-size: 3.5rem; font-weight: 800; line-height: 1; }
-    .recall-label { font-size: 0.9rem; color: #666; margin-top: 8px; }
-    .info-box { padding: 14px 16px; border-radius: 6px; margin: 12px 0; font-size: 0.875rem; }
-    .info { background: #e8f5fd; border-left: 3px solid #1cb0f6; color: #0277bd; }
-    .warning { background: #fff8e1; border-left: 3px solid #ff9600; color: #e65100; }
-    .checkbox-label { display: flex; align-items: center; gap: 8px; cursor: pointer; margin: 8px 0; font-size: 0.85rem; }
-    .checkbox-label input { width: auto; cursor: pointer; }
-    .feature-impact { background: #fff; padding: 24px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); border: 1px solid #eee; }
-    .row2-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 16px; margin-bottom: 24px; max-width: 1200px; margin-left: auto; margin-right: auto; }
-    .row3-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-top: 24px; }
-    .feature-bar { display: flex; align-items: center; margin: 8px 0; }
-    .feature-name { width: 180px; font-size: 0.85rem; color: #4a4a4a; font-weight: 500; }
-    .feature-bar-container { flex: 1; height: 28px; background: #f5f5f5; border-radius: 4px; position: relative; overflow: hidden; }
-    .feature-bar-fill { height: 100%; transition: width 0.3s ease; }
-    .feature-value { width: 70px; text-align: right; font-size: 0.85rem; font-weight: 600; margin-left: 12px; }
-    .footer { margin-top: 40px; padding: 20px; color: #888; text-align: center; font-size: 0.85rem; }
-    @media (max-width: 1024px) { .controls-grid { grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); } .results-section { grid-template-columns: 1fr; } }
-  </style>
-</head>
-<body>
-  <div id="root"></div>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>🦉 Duolingo Memory Engine</title>
+    <script
+      crossorigin
+      src="https://unpkg.com/react@18/umd/react.production.min.js"
+    ></script>
+    <script
+      crossorigin
+      src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"
+    ></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+  <body class="bg-gray-50">
+    <div id="root"></div>
 
-  <script type="text/babel">
-    const { useState, useEffect, useMemo } = React;
+    <script type="text/babel">
+      const { useState, useEffect } = React;
 
-    class MultiscaleContextModel {
-      constructor(mu = 0.042, nu = 1.096, N = 100, xi = 0.9, eps_r = 9.0) {
-        this.xi = xi;
-        this.eps_r = eps_r;
-        this.taus = Array.from({ length: N }, (_, i) => mu * Math.pow(nu, i));
-        this.strengths = new Array(N).fill(0);
-      }
+      class MultiscaleContextModel {
+        constructor(mu = 0.042, nu = 1.096, N = 100, xi = 0.9, eps_r = 9.0) {
+          this.xi = xi;
+          this.eps_r = eps_r;
+          this.taus = Array.from({ length: N }, (_, i) => mu * Math.pow(nu, i));
+          this.strengths = new Array(N).fill(0);
+        }
 
-      study(delta, correct) {
-        const decay = this.taus.map(tau => Math.exp(-delta / tau));
-        this.strengths = this.strengths.map((s, i) => s * decay[i] + (correct ? this.eps_r : 1.0));
-      }
-
-      predict(delta) {
-        const decay = this.taus.map(tau => Math.exp(-delta / tau));
-        const strength = this.strengths.reduce((sum, s, i) => sum + s * decay[i], 0);
-        return 1.0 / (1.0 + Math.exp(-this.xi * strength));
-      }
-    }
-
-    async function predictHalfLife(features) {
-      try {
-        const res = await fetch('http://localhost:5000/predict', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(features)
-        });
-        return (await res.json()).h_pred;
-      } catch (err) {
-        console.error('Prediction error:', err);
-        return 2.0;
-      }
-    }
-
-    function App() {
-
-      const [lang, setLang] = useState('en->es');
-      const [posLabel, setPosLabel] = useState('noun');
-      const [tense, setTense] = useState('present_indicative');
-      const [person, setPerson] = useState('1st_person');
-      const [gramNumber, setGramNumber] = useState('singular');
-      const [gender, setGender] = useState('masculine');
-      const [caseVal, setCaseVal] = useState('nominative');
-      const [definiteness, setDefiniteness] = useState('definite');
-      const [degree, setDegree] = useState('comparative');
-      const [historySeen, setHistorySeen] = useState(23);
-      const [historyCorrect, setHistoryCorrect] = useState(13);
-      const [timeLagDays, setTimeLagDays] = useState(2.0);
-      const [hourOfDay, setHourOfDay] = useState(1.0);
-      const [historyMode, setHistoryMode] = useState('fixed');
-      const [compareMode, setCompareMode] = useState(false);
-
-
-      const [mcmP, setMcmP] = useState(0.5);
-      const [hPred, setHPred] = useState(2.0);
-      const [pPred, setPPred] = useState(0.5);
-      const [recallColor, setRecallColor] = useState('#ffc800');
-      const [recallLabel, setRecallLabel] = useState('Fading');
-
-      const handlePredict = async () => {
-        const mcm = new MultiscaleContextModel();
-        
-        if (historyMode === 'fixed') {
-          for (let i = 0; i < historySeen; i++) mcm.study(0.5, i < historyCorrect);
-        } else {
-          [1.0, 2.0, 4.0, 7.0].slice(0, historySeen).forEach((interval, i) => 
-            mcm.study(interval, i < historyCorrect)
+        study(delta, correct) {
+          const decay = this.taus.map((tau) => Math.exp(-delta / tau));
+          this.strengths = this.strengths.map(
+            (s, i) => s * decay[i] + (correct ? this.eps_r : 1.0),
           );
         }
 
-        const mcmP = mcm.predict(timeLagDays);
-        const acc = historyCorrect / Math.max(historySeen, 1);
-        
-        const h = await predictHalfLife({
-          hour_of_day: hourOfDay, time_lag_days: timeLagDays, lang,
-          mcm_predicted_p: mcmP, historical_accuracy: acc,
-          history_seen: historySeen, history_correct: historyCorrect,
-          pos_label: posLabel, tense, person, grammatical_number: gramNumber,
-          gender, case: caseVal, definiteness, degree
-        });
-
-        const p = Math.pow(2, -timeLagDays / h);
-        const [color, label] = p >= 0.8 ? ['#58cc02', 'Strong'] : p >= 0.5 ? ['#ffc800', 'Fading'] : ['#ff4b4b', 'Weak'];
-
-        setMcmP(mcmP); setHPred(h); setPPred(p); setRecallColor(color); setRecallLabel(label);
-      };
-
-      useEffect(() => {
-        const maxDays = Math.max(30, hPred * 2.5);
-        const days = Array.from({ length: 200 }, (_, i) => (i / 199) * maxDays);
-        const pPrimary = days.map(d => Math.pow(2, -d / hPred));
-
-        const traces = [{
-          x: days,
-          y: pPrimary,
-          type: 'scatter',
-          mode: 'lines',
-          name: 'Your Learner',
-          line: { color: '#1cb0f6', width: 4 },
-          fill: 'tozeroy',
-          fillcolor: 'rgba(28,176,246,0.08)'
-        }];
-
-        if (compareMode) {
-          const hBench = hPred * 0.5;
-          const pBench = days.map(d => Math.pow(2, -d / hBench));
-          traces.push({
-            x: days,
-            y: pBench,
-            type: 'scatter',
-            mode: 'lines',
-            name: 'Fast Forgetter',
-            line: { color: '#ff9600', width: 2, dash: 'dash' }
-          });
+        predict(delta) {
+          const decay = this.taus.map((tau) => Math.exp(-delta / tau));
+          const strength = this.strengths.reduce(
+            (sum, s, i) => sum + s * decay[i],
+            0,
+          );
+          return 1.0 / (1.0 + Math.exp(-this.xi * strength));
         }
+      }
 
-        traces.push({
-          x: [timeLagDays],
-          y: [pPred],
-          type: 'scatter',
-          mode: 'markers',
-          name: 'Today',
-          marker: { color: '#58cc02', size: 14, symbol: 'diamond', line: { width: 2, color: 'white' } }
-        });
+      async function predictHalfLife(features) {
+        try {
+          const res = await fetch("http://localhost:5000/predict", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(features),
+          });
+          return (await res.json()).h_pred;
+        } catch (err) {
+          console.error("Prediction error:", err);
+          return 2.0;
+        }
+      }
 
-        const layout = {
-          xaxis: { title: 'Days Since Last Practice', gridcolor: '#eee' },
-          yaxis: { title: 'Probability of Recall', range: [0, 1.05], tickformat: '.0%', gridcolor: '#eee' },
-          plot_bgcolor: 'white',
-          paper_bgcolor: 'white',
-          hovermode: 'x unified',
-          legend: { orientation: 'h', yanchor: 'bottom', y: 1.02, xanchor: 'right', x: 1 },
-          shapes: [{
-            type: 'line',
-            x0: 0,
-            x1: maxDays,
-            y0: 0.5,
-            y1: 0.5,
-            line: { color: '#ff4b4b', width: 2, dash: 'dot' }
-          }],
-          margin: { t: 40, b: 60, l: 60, r: 40 }
+      function App() {
+        const [lang, setLang] = useState("en->es");
+        const [posLabel, setPosLabel] = useState("noun");
+        const [tense, setTense] = useState("present_indicative");
+        const [person, setPerson] = useState("1st_person");
+        const [gramNumber, setGramNumber] = useState("singular");
+        const [gender, setGender] = useState("masculine");
+        const [caseVal, setCaseVal] = useState("nominative");
+        const [definiteness, setDefiniteness] = useState("definite");
+        const [degree, setDegree] = useState("comparative");
+        const [historySeen, setHistorySeen] = useState(23);
+        const [historyCorrect, setHistoryCorrect] = useState(13);
+        const [timeLagDays, setTimeLagDays] = useState(2.0);
+        const [hourOfDay, setHourOfDay] = useState(1.0);
+        const [historyMode, setHistoryMode] = useState("fixed");
+        const [compareMode, setCompareMode] = useState(false);
+
+        const [mcmP, setMcmP] = useState(0.5);
+        const [hPred, setHPred] = useState(2.0);
+        const [pPred, setPPred] = useState(0.5);
+
+        const handlePredict = async () => {
+          const mcm = new MultiscaleContextModel();
+
+          if (historyMode === "fixed") {
+            for (let i = 0; i < historySeen; i++)
+              mcm.study(0.5, i < historyCorrect);
+          } else {
+            [1.0, 2.0, 4.0, 7.0]
+              .slice(0, historySeen)
+              .forEach((interval, i) =>
+                mcm.study(interval, i < historyCorrect),
+              );
+          }
+
+          const mcmP = mcm.predict(timeLagDays);
+          const acc = historyCorrect / Math.max(historySeen, 1);
+
+          const h = await predictHalfLife({
+            hour_of_day: hourOfDay,
+            time_lag_days: timeLagDays,
+            lang,
+            mcm_predicted_p: mcmP,
+            historical_accuracy: acc,
+            history_seen: historySeen,
+            history_correct: historyCorrect,
+            pos_label: posLabel,
+            tense,
+            person,
+            grammatical_number: gramNumber,
+            gender,
+            case: caseVal,
+            definiteness,
+            degree,
+          });
+
+          const p = Math.pow(2, -timeLagDays / h);
+          setMcmP(mcmP);
+          setHPred(h);
+          setPPred(p);
         };
 
-        Plotly.newPlot('forgetting-curve', traces, layout, { responsive: true });
-      }, [hPred, pPred, timeLagDays, compareMode]);
+        useEffect(() => {
+          const maxDays = Math.max(30, hPred * 2.5);
+          const days = Array.from(
+            { length: 100 },
+            (_, i) => (i / 99) * maxDays,
+          );
+          const recall = days.map((d) => Math.pow(2, -d / hPred));
 
-      const features = useMemo(() => [
-        { name: 'MCM Baseline', value: 0.45, color: '#58cc02' },
-        { name: 'Historical Accuracy', value: 0.32, color: '#58cc02' },
-        { name: 'Time Lag', value: -0.28, color: '#ff4b4b' },
-        { name: 'Part of Speech', value: -0.15, color: '#ff4b4b' },
-        { name: 'Tense', value: -0.12, color: '#ff4b4b' },
-        { name: 'Hour of Day', value: 0.08, color: '#58cc02' },
-        { name: 'Times Correct', value: 0.06, color: '#58cc02' },
-        { name: 'Times Wrong', value: -0.05, color: '#ff4b4b' }
-      ], []);
+          const traces = [
+            {
+              x: days,
+              y: recall,
+              type: "scatter",
+              mode: "lines",
+              name: "Your Learner",
+              line: { color: "#1cb0f6", width: 3 },
+              fill: "tozeroy",
+              fillcolor: "rgba(28,176,246,0.08)",
+            },
+          ];
 
-      const historicalAccuracy = historyCorrect / Math.max(historySeen, 1);
-      const threshold = 0.5;
-      const daysToThreshold = pPred >= threshold ? hPred * Math.log2(1.0 / threshold) : 0;
-      const remaining = Math.max(0, daysToThreshold - timeLagDays);
+          if (compareMode) {
+            const benchmark = days.map((d) => Math.pow(2, -d / (hPred * 0.5)));
+            traces.push({
+              x: days,
+              y: benchmark,
+              type: "scatter",
+              mode: "lines",
+              name: "Fast Forgetter",
+              line: { color: "#ff9600", width: 2, dash: "dash" },
+            });
+          }
 
-      return (
-        <div className="app">
-          <h1>🦉 Duolingo Memory Engine</h1>
-          
-          <div className="controls">
-            <div className="controls-grid">
-            <div>
-            <label>Language Track</label>
-            <select value={lang} onChange={e => setLang(e.target.value)}>
-              <option value="en->es">en→es</option>
-              <option value="en->fr">en→fr</option>
-              <option value="en->de">en→de</option>
-              <option value="en->it">en→it</option>
-              <option value="en->pt">en→pt</option>
-              <option value="es->en">es→en</option>
-              <option value="it->en">it→en</option>
-              <option value="pt->en">pt→en</option>
-            </select>
-            </div>
+          traces.push({
+            x: [timeLagDays],
+            y: [pPred],
+            type: "scatter",
+            mode: "markers",
+            name: "Today",
+            marker: {
+              color: "#58cc02",
+              size: 14,
+              symbol: "diamond",
+              line: { width: 2, color: "white" },
+            },
+          });
 
-            <div>
-            <label>Part of Speech</label>
-            <select value={posLabel} onChange={e => setPosLabel(e.target.value)}>
-              <option value="noun">Noun</option>
-              <option value="verb_lexical">Verb (lexical)</option>
-              <option value="verb_ser">Verb (ser/estar)</option>
-              <option value="verb_auxiliary">Verb (auxiliary)</option>
-              <option value="verb_modal">Verb (modal)</option>
-              <option value="adjective">Adjective</option>
-              <option value="adverb">Adverb</option>
-              <option value="determiner">Determiner</option>
-              <option value="pronoun">Pronoun</option>
-              <option value="preposition">Preposition</option>
-              <option value="conjunction">Conjunction</option>
-              <option value="proper_noun">Proper Noun</option>
-              <option value="unknown">Unknown</option>
-            </select>
-            </div>
+          Plotly.newPlot(
+            "chart",
+            traces,
+            {
+              xaxis: { title: "Days Since Last Practice", gridcolor: "#eee" },
+              yaxis: {
+                title: "Recall Probability",
+                range: [0, 1.05],
+                tickformat: ".0%",
+                gridcolor: "#eee",
+              },
+              plot_bgcolor: "white",
+              paper_bgcolor: "white",
+              hovermode: "x unified",
+              legend: {
+                orientation: "h",
+                yanchor: "bottom",
+                y: 1.02,
+                xanchor: "right",
+                x: 1,
+              },
+              shapes: [
+                {
+                  type: "line",
+                  x0: 0,
+                  x1: maxDays,
+                  y0: 0.5,
+                  y1: 0.5,
+                  line: { color: "#ff4b4b", width: 2, dash: "dot" },
+                },
+              ],
+              margin: { t: 40, b: 60, l: 60, r: 40 },
+            },
+            { responsive: true },
+          );
+        }, [hPred, pPred, timeLagDays, compareMode]);
 
-            <div>
-            <label>Tense / Mood</label>
-            <select value={tense} onChange={e => setTense(e.target.value)}>
-              <option value="present_indicative">present_indicative</option>
-              <option value="unknown">unknown</option>
-              <option value="past_participle">past_participle</option>
-              <option value="infinitive">infinitive</option>
-              <option value="gerund">gerund</option>
-              <option value="preterite">preterite</option>
-              <option value="conditional">conditional</option>
-              <option value="future_indicative">future_indicative</option>
-              <option value="imperative">imperative</option>
-              <option value="past_imperfect_indicative">past_imperfect_indicative</option>
-              <option value="present_subjunctive">present_subjunctive</option>
-            </select>
-            </div>
+        const features = [
+          { name: "MCM Baseline", value: 0.45 },
+          { name: "Historical Accuracy", value: 0.32 },
+          { name: "Time Lag", value: -0.28 },
+          { name: "Part of Speech", value: -0.15 },
+          { name: "Tense", value: -0.12 },
+          { name: "Hour of Day", value: 0.08 },
+          { name: "Times Correct", value: 0.06 },
+          { name: "Times Wrong", value: -0.05 },
+        ];
 
-            <div>
-            <label>Person</label>
-            <select value={person} onChange={e => setPerson(e.target.value)}>
-              <option value="1st_person">1st_person</option>
-              <option value="unknown">unknown</option>
-              <option value="2nd_person">2nd_person</option>
-              <option value="3rd_person">3rd_person</option>
-            </select>
-            </div>
+        const historicalAccuracy = historyCorrect / Math.max(historySeen, 1);
+        const daysToThreshold = pPred >= 0.5 ? hPred * Math.log2(2.0) : 0;
+        const remaining = Math.max(0, daysToThreshold - timeLagDays);
+        const recallStatus =
+          pPred >= 0.8
+            ? {
+                color: "text-green-500",
+                bg: "bg-green-50",
+                border: "border-green-500",
+                label: "Strong",
+              }
+            : pPred >= 0.5
+              ? {
+                  color: "text-yellow-500",
+                  bg: "bg-yellow-50",
+                  border: "border-yellow-500",
+                  label: "Fading",
+                }
+              : {
+                  color: "text-red-500",
+                  bg: "bg-red-50",
+                  border: "border-red-500",
+                  label: "Weak",
+                };
 
-            <div>
-            <label>Number</label>
-            <select value={gramNumber} onChange={e => setGramNumber(e.target.value)}>
-              <option value="singular">singular</option>
-              <option value="unknown">unknown</option>
-              <option value="plural">plural</option>
-              <option value="singular_or_plural">singular_or_plural</option>
-            </select>
-            </div>
+        return (
+          <div className="min-h-screen max-w-7xl mx-auto p-8">
+            <h1 className="text-4xl font-bold text-green-500 text-center mb-8">
+              🦉 Duolingo Memory Engine
+            </h1>
 
-            <div>
-            <label>Gender</label>
-            <select value={gender} onChange={e => setGender(e.target.value)}>
-              <option value="masculine">masculine</option>
-              <option value="unknown">unknown</option>
-              <option value="feminine">feminine</option>
-              <option value="neuter">neuter</option>
-              <option value="masculine_or_feminine">masculine_or_feminine</option>
-            </select>
-            </div>
+            <div className="bg-white rounded-lg shadow p-6 mb-6">
+              <div className="grid grid-cols-4 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Language Track</label>
+                  <select value={lang} onChange={(e) => setLang(e.target.value)} className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500">
+                    <option value="en->es">en→es</option>
+                    <option value="en->fr">en→fr</option>
+                    <option value="en->de">en→de</option>
+                    <option value="en->it">en→it</option>
+                    <option value="en->pt">en→pt</option>
+                    <option value="es->en">es→en</option>
+                    <option value="it->en">it→en</option>
+                    <option value="pt->en">pt→en</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Part of Speech</label>
+                  <select value={posLabel} onChange={(e) => setPosLabel(e.target.value)} className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500">
+                    <option value="noun">Noun</option>
+                    <option value="verb_lexical">Verb (lexical)</option>
+                    <option value="verb_ser">Verb (ser/estar)</option>
+                    <option value="verb_auxiliary">Verb (auxiliary)</option>
+                    <option value="verb_modal">Verb (modal)</option>
+                    <option value="adjective">Adjective</option>
+                    <option value="adverb">Adverb</option>
+                    <option value="determiner">Determiner</option>
+                    <option value="pronoun">Pronoun</option>
+                    <option value="preposition">Preposition</option>
+                    <option value="conjunction">Conjunction</option>
+                    <option value="proper_noun">Proper Noun</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Tense / Mood</label>
+                  <select value={tense} onChange={(e) => setTense(e.target.value)} className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500">
+                    <option value="present_indicative">present_indicative</option>
+                    <option value="past_participle">past_participle</option>
+                    <option value="infinitive">infinitive</option>
+                    <option value="gerund">gerund</option>
+                    <option value="preterite">preterite</option>
+                    <option value="conditional">conditional</option>
+                    <option value="future_indicative">future_indicative</option>
+                    <option value="imperative">imperative</option>
+                    <option value="past_imperfect_indicative">past_imperfect_indicative</option>
+                    <option value="present_subjunctive">present_subjunctive</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Days Since Last Practice: <span className="text-green-500 font-semibold">{timeLagDays.toFixed(1)}</span></label>
+                  <input type="range" min="0.1" max="365" step="0.5" value={timeLagDays} onChange={(e) => setTimeLagDays(parseFloat(e.target.value))} className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-green-500" />
+                </div>
 
-            <div>
-            <label>Case</label>
-            <select value={caseVal} onChange={e => setCaseVal(e.target.value)}>
-              <option value="nominative">nominative</option>
-              <option value="unknown">unknown</option>
-              <option value="accusative">accusative</option>
-              <option value="dative">dative</option>
-              <option value="genitive">genitive</option>
-              <option value="vocative">vocative</option>
-            </select>
-            </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Person</label>
+                  <select value={person} onChange={(e) => setPerson(e.target.value)} className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500">
+                    <option value="1st_person">1st_person</option>
+                    <option value="2nd_person">2nd_person</option>
+                    <option value="3rd_person">3rd_person</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Number</label>
+                  <select value={gramNumber} onChange={(e) => setGramNumber(e.target.value)} className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500">
+                    <option value="singular">singular</option>
+                    <option value="plural">plural</option>
+                    <option value="singular_or_plural">singular_or_plural</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Gender</label>
+                  <select value={gender} onChange={(e) => setGender(e.target.value)} className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500">
+                    <option value="masculine">masculine</option>
+                    <option value="feminine">feminine</option>
+                    <option value="neuter">neuter</option>
+                    <option value="masculine_or_feminine">masculine_or_feminine</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Hour of Day: <span className="text-green-500 font-semibold">{hourOfDay.toFixed(1)}</span></label>
+                  <input type="range" min="0" max="10" step="0.1" value={hourOfDay} onChange={(e) => setHourOfDay(parseFloat(e.target.value))} className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-green-500" />
+                </div>
 
-            <div>
-            <label>Definiteness</label>
-            <select value={definiteness} onChange={e => setDefiniteness(e.target.value)}>
-              <option value="definite">definite</option>
-              <option value="unknown">unknown</option>
-              <option value="indefinite">indefinite</option>
-              <option value="demonstrative">demonstrative</option>
-              <option value="possessive">possessive</option>
-            </select>
-            </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Case</label>
+                  <select value={caseVal} onChange={(e) => setCaseVal(e.target.value)} className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500">
+                    <option value="nominative">nominative</option>
+                    <option value="accusative">accusative</option>
+                    <option value="dative">dative</option>
+                    <option value="genitive">genitive</option>
+                    <option value="vocative">vocative</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Definiteness</label>
+                  <select value={definiteness} onChange={(e) => setDefiniteness(e.target.value)} className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500">
+                    <option value="definite">definite</option>
+                    <option value="indefinite">indefinite</option>
+                    <option value="demonstrative">demonstrative</option>
+                    <option value="possessive">possessive</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Adj. Degree</label>
+                  <select value={degree} onChange={(e) => setDegree(e.target.value)} className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500">
+                    <option value="comparative">comparative</option>
+                    <option value="superlative">superlative</option>
+                  </select>
+                </div>
+                <div className="flex items-center justify-center gap-3">
+                  <label className="flex items-center gap-1 cursor-pointer">
+                    <input type="radio" checked={historyMode === "fixed"} onChange={() => setHistoryMode("fixed")} className="accent-green-500" />
+                    <span className="text-sm">Fixed</span>
+                  </label>
+                  <label className="flex items-center gap-1 cursor-pointer">
+                    <input type="radio" checked={historyMode === "spaced"} onChange={() => setHistoryMode("spaced")} className="accent-green-500" />
+                    <span className="text-sm">Spaced</span>
+                  </label>
+                  <label className="flex items-center gap-1 cursor-pointer">
+                    <input type="checkbox" checked={compareMode} onChange={(e) => setCompareMode(e.target.checked)} className="accent-green-500" />
+                    <span className="text-sm">Compare</span>
+                  </label>
+                </div>
 
-            <div>
-            <label>Adj. Degree</label>
-            <select value={degree} onChange={e => setDegree(e.target.value)}>
-              <option value="comparative">comparative</option>
-              <option value="unknown">unknown</option>
-              <option value="superlative">superlative</option>
-            </select>
-            </div>
-
-            <div>
-            <label>Total Times Practiced</label>
-            <input type="number" min="1" max="200" value={historySeen} 
-              onChange={e => {
-                const val = parseInt(e.target.value) || 1;
-                setHistorySeen(val);
-                if (historyCorrect > val) setHistoryCorrect(val);
-              }} />
-            </div>
-
-            <div>
-            <label>Total Times Correct</label>
-            <input type="number" min="0" max={historySeen} value={historyCorrect} 
-              onChange={e => setHistoryCorrect(Math.min(parseInt(e.target.value) || 0, historySeen))} />
-            </div>
-            </div>
-
-            <div style={{marginTop: '16px', display: 'flex', gap: '16px', alignItems: 'center', flexWrap: 'wrap'}}>
-              <div>
-                <label>Days Since Last Practice: <span className="range-value">{timeLagDays.toFixed(1)}</span></label>
-                <input type="range" min="0.1" max="365" step="0.5" value={timeLagDays} 
-                  onChange={e => setTimeLagDays(parseFloat(e.target.value))} style={{width: '200px'}} />
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Times Practiced</label>
+                  <input type="number" min="1" max="200" value={historySeen} onChange={(e) => { const val = parseInt(e.target.value) || 1; setHistorySeen(val); if (historyCorrect > val) setHistoryCorrect(val); }} className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Times Correct</label>
+                  <input type="number" min="0" max={historySeen} value={historyCorrect} onChange={(e) => setHistoryCorrect(Math.min(parseInt(e.target.value) || 0, historySeen))} className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500" />
+                </div>
+                <div className="flex items-center justify-center col-span-2">
+                  <button onClick={handlePredict} className="bg-green-500 hover:bg-green-600 text-white font-semibold px-12 py-2 rounded-lg transition">
+                    Predict Memory
+                  </button>
+                </div>
               </div>
-              <div>
-                <label>Hour of Day Practicing: <span className="range-value">{hourOfDay.toFixed(1)}</span></label>
-                <input type="range" min="0" max="10" step="0.1" value={hourOfDay} 
-                  onChange={e => setHourOfDay(parseFloat(e.target.value))} style={{width: '200px'}} />
-              </div>
-              <label className="checkbox-label">
-                <input type="radio" checked={historyMode === 'fixed'} onChange={() => setHistoryMode('fixed')} />
-                Fixed intervals (0.5 days)
-              </label>
-              <label className="checkbox-label">
-                <input type="radio" checked={historyMode === 'spaced'} onChange={() => setHistoryMode('spaced')} />
-                Spaced (1, 2, 4, 7 days)
-              </label>
-              <label className="checkbox-label">
-                <input type="checkbox" checked={compareMode} onChange={e => setCompareMode(e.target.checked)} />
-                Compare with Fast Forgetter
-              </label>
             </div>
-            <button className="predict-btn" onClick={handlePredict}>Predict Memory</button>
-          </div>
 
-            <div className="row2-grid">
-              <div className="recall-card" style={{
-                background: `${recallColor}22`,
-                border: `2px solid ${recallColor}`
-              }}>
-                <div className="recall-value" style={{ color: recallColor }}>
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
+              <div
+                className={`${recallStatus.bg} ${recallStatus.border} border-2 rounded-lg p-6 text-center`}
+              >
+                <div className={`text-5xl font-bold ${recallStatus.color}`}>
                   {(pPred * 100).toFixed(1)}%
                 </div>
-                <div className="recall-label">Recall Probability — <b>{recallLabel}</b></div>
+                <div className="text-sm text-gray-600 mt-2">
+                  Recall — <b>{recallStatus.label}</b>
+                </div>
               </div>
-
-              <div className="card">
-                <div className="metric-label">Memory Half-Life</div>
-                <div className="metric-value">{hPred.toFixed(2)} days</div>
+              <div className="bg-white border border-gray-200 rounded-lg p-6 text-center">
+                <div className="text-xs text-gray-500 uppercase mb-2">
+                  Half-Life
+                </div>
+                <div className="text-3xl font-bold">
+                  {hPred.toFixed(2)} days
+                </div>
               </div>
-
-              <div className="card">
-                <div className="metric-label">MCM Cognitive Baseline</div>
-                <div className="metric-value">{(mcmP * 100).toFixed(1)}%</div>
+              <div className="bg-white border border-gray-200 rounded-lg p-6 text-center">
+                <div className="text-xs text-gray-500 uppercase mb-2">
+                  MCM Baseline
+                </div>
+                <div className="text-3xl font-bold">
+                  {(mcmP * 100).toFixed(1)}%
+                </div>
               </div>
-
-              <div className="card">
-                <div className="metric-label">Historical Accuracy</div>
-                <div className="metric-value">{(historicalAccuracy * 100).toFixed(1)}%</div>
+              <div className="bg-white border border-gray-200 rounded-lg p-6 text-center">
+                <div className="text-xs text-gray-500 uppercase mb-2">
+                  Accuracy
+                </div>
+                <div className="text-3xl font-bold">
+                  {(historicalAccuracy * 100).toFixed(1)}%
+                </div>
               </div>
-
-              <div className="card">
-                <div className="metric-label">Review Recommended</div>
-                <div className="metric-value" style={{fontSize: '1.2rem', color: pPred >= threshold ? '#1cb0f6' : '#ff4b4b'}}>
-                  {pPred >= threshold ? `~${remaining.toFixed(1)} days` : 'Now!'}
+              <div className="bg-white border border-gray-200 rounded-lg p-6 text-center">
+                <div className="text-xs text-gray-500 uppercase mb-2">
+                  Review In
+                </div>
+                <div
+                  className={`text-2xl font-bold ${pPred >= 0.5 ? "text-blue-500" : "text-red-500"}`}
+                >
+                  {pPred >= 0.5 ? `~${remaining.toFixed(1)} days` : "Now!"}
                 </div>
               </div>
             </div>
 
-            <div className="row3-grid">
-              <div style={{background: '#fff', padding: '24px', borderRadius: '8px', border: '1px solid #eee', boxShadow: '0 2px 8px rgba(0,0,0,0.04)'}}>
-                <div id="forgetting-curve" style={{ width: '100%', height: '500px' }}></div>
+            <div className="grid md:grid-cols-2 gap-6">
+              <div className="bg-white rounded-lg shadow p-6">
+                <div
+                  id="chart"
+                  style={{ width: "100%", height: "400px" }}
+                ></div>
               </div>
 
-              <div className="feature-impact">
-
-              {features.map(f => {
-                const absMax = 0.45;
-                const width = (Math.abs(f.value) / absMax) * 100;
-                return (
-                  <div key={f.name} className="feature-bar">
-                    <div className="feature-name">{f.name}</div>
-                    <div className="feature-bar-container">
-                      <div className="feature-bar-fill" style={{
-                        width: `${width}%`,
-                        background: f.color
-                      }}></div>
+              <div className="bg-white rounded-lg shadow p-6">
+                <h3 className="text-lg font-semibold mb-4">Feature Impact</h3>
+                {features.map((f) => (
+                  <div key={f.name} className="flex items-center mb-3">
+                    <div className="w-40 text-sm font-medium text-gray-700">
+                      {f.name}
                     </div>
-                    <div className="feature-value" style={{color: f.color}}>
-                      {f.value > 0 ? '+' : ''}{f.value.toFixed(3)}
+                    <div className="flex-1 h-7 bg-gray-100 rounded relative overflow-hidden">
+                      <div
+                        className={`h-full ${f.value > 0 ? "bg-green-500" : "bg-red-500"}`}
+                        style={{
+                          width: `${(Math.abs(f.value) / 0.45) * 100}%`,
+                        }}
+                      ></div>
+                    </div>
+                    <div
+                      className={`w-20 text-right text-sm font-semibold ${f.value > 0 ? "text-green-500" : "text-red-500"}`}
+                    >
+                      {f.value > 0 ? "+" : ""}
+                      {f.value.toFixed(3)}
                     </div>
                   </div>
-                );
-              })}
+                ))}
               </div>
             </div>
-        </div>
-      );
-    }
+          </div>
+        );
+      }
 
-    ReactDOM.render(<App />, document.getElementById('root'));
-  </script>
-</body>
+      ReactDOM.render(<App />, document.getElementById("root"));
+    </script>
+  </body>
 </html>

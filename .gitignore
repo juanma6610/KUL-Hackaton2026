@@ -4,6 +4,9 @@ data/*
 #Models         
 models/
 
+/task.md
+
+
 #Result
 results/
 

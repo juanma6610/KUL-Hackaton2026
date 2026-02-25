@@ -27,6 +27,9 @@ def main():
     # 3. Save Artifacts
     model.save_model(MODEL_SAVE_PATH)
     print(f"💾 Model saved to {MODEL_SAVE_PATH}")
+
+    # 3.5 Dump official evaluation CSV
+    # dump_predictions_to_csv(X_test, y_test, model)
     
     # 4. Generate Visuals
     generate_pitch_deck_visuals(model, X_train, X_test)

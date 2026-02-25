@@ -23,7 +23,6 @@ def build_gold_dataset():
     print("📝 Running NLP grammatical enrichment (enrich_chunk)...")
     df = enrich_chunk(df)
     
-    # Calculate historical accuracy here so you don't do it during training
     print("🧮 Calculating historical accuracies...")
     # Historical accuracy features
     df['historical_accuracy'] = np.where(

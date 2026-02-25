@@ -7,4 +7,4 @@ LN2 = math.log(2.0)
 
 # File paths
 MCM_CACHE_FILE = "mcm_cached_dataset.pkl"
-MODEL_SAVE_PATH = "models/xgboost_baseline0.001.json"
+MODEL_SAVE_PATH = "models/xgboost_full_feat.json"

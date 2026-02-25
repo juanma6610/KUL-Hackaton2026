@@ -28,7 +28,7 @@ def plot_halflife_correlation(h_true, h_pred_baseline, h_pred_new):
     axes[0].set_xlabel("True $\log_{10}(h)$ (Empirical)", fontsize=14)
     axes[0].set_ylabel("Predicted $\log_{10}(h)$", fontsize=14)
     
-    # 4. Plot 2: Your XGBoost Model
+    # 4. Plot 2:  XGBoost Model
     sns.scatterplot(x=log_h_true, y=log_h_new, ax=axes[1], 
                     alpha=0.3, color="#4ECDC4", s=15, edgecolor="none")
     axes[1].set_title("Our Optimized Model (XGBoost + MCM)", fontsize=16, pad=15)
@@ -50,17 +50,10 @@ def plot_halflife_correlation(h_true, h_pred_baseline, h_pred_new):
     plt.show()
     print("✅ Saved as 'half_life_correlation_comparison.png' at 300 DPI!")
 
-# --- How to use it ---
-# h_true = The actual empirical half-life calculated from your test set
-# h_base = The predictions from the baseline model
-# h_new = The predictions from your new master XGBoost model
-#
-# plot_halflife_correlation(h_true, h_base, h_new)
 
 def generate_pitch_deck_visuals(model, X_train, X_test):
     print("Initializing SHAP TreeExplainer...")
     
-    # SHAP requires the underlying booster for XGBoost categorical data
     explainer = shap.TreeExplainer(model)
     
     # Calculate SHAP values for a random sample of the test set 

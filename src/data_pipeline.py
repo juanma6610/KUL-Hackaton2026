@@ -17,7 +17,6 @@ def get_xgboost_data(processed_file_path="data/processed_features.parquet", user
             replace=False
         )
         df = df[df['user_id'].isin(sampled_users)].copy()
-        print(f"Trial Data ready: Shrunk from {original_len} rows to {len(df)} rows.")
 
     # # MCM with caching
     # cache_file = MCM_CACHE_FILE
@@ -69,6 +68,8 @@ def get_xgboost_data(processed_file_path="data/processed_features.parquet", user
     X['case'] = df['case'].fillna('unknown')
     X['definiteness'] = df['definiteness'].fillna('unknown')
     X['degree'] = df['degree'].fillna('unknown')
+    X['word_length'] = df['surface_form'].str.len()
+    
 
     # Cast all categoricals for native XGBoost handling
     cat_cols = ['lang', 'pos_label', 'tense', 'person',

@@ -4,5 +4,4 @@
 - Create some SHAP graphics and other stuff to show explainability of the model
 - Create graphs to compare previous models with the different new models
 - Creating an engaging story for the presentation (Vera)
-- Understand the Half Life Regression Model
 

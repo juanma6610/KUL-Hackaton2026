@@ -28,7 +28,7 @@ def train_xgboost_baseline(X_train, X_test, y_train, y_test, use_optuna=False, n
                 "tree_method": "hist",
                 "enable_categorical": True,
                 "n_estimators": trial.suggest_int("n_estimators", 200, 8000, step=100),
-                "learning_rate": trial.suggest_float("learning_rate", 0.005, 0.1, log=True),
+                "learning_rate": trial.suggest_float("learning_rate", 0.01, 0.1, log=True),
                 "max_depth": trial.suggest_int("max_depth", 3, 12),
                 "subsample": trial.suggest_float("subsample", 0.6, 1.0),
                 "colsample_bytree": trial.suggest_float("colsample_bytree", 0.5, 1.0),
@@ -65,7 +65,7 @@ def train_xgboost_baseline(X_train, X_test, y_train, y_test, use_optuna=False, n
             tree_method="hist", 
             enable_categorical=True,
             n_estimators=200000,
-            learning_rate=0.001,
+            learning_rate=0.001   ,
             max_depth=6,
             early_stopping_rounds=50,
             random_state=42

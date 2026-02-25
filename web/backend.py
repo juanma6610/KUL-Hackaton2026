@@ -11,6 +11,32 @@ model = xgb.XGBRegressor()
 model.load_model("../models/xgboost_baseline0.001.json")
 
 @app.route('/predict', methods=['POST'])
+def old_models():
+    # --- MODEL 1: Pimsleur (1967) ---
+    # Weights: x_n (practices) = 2.4, x_b (bias) = -16.5
+    # Notice it uses history_seen (total practices), not just correct answers!
+    pimsleur_log_h = (2.4 * history_seen) - 16.5
+
+    # Clip the half-life so the math doesn't explode into infinity or zero
+    pimsleur_h = np.clip(2 ** pimsleur_log_h, 0.0001, 274.0) 
+    pimsleur_p = 2 ** (-time_lag_days / pimsleur_h)
+
+
+    # --- MODEL 2: Leitner (1972) ---
+    # Weights: x_correct = 1, x_incorrect = -1
+    # Every correct answer doubles the interval, every wrong answer halves it.
+    leitner_log_h = (1.0 * history_correct) + (-1.0 * history_wrong)
+
+    leitner_h = np.clip(2 ** leitner_log_h, 0.0001, 274.0)
+    leitner_p = 2 ** (-time_lag_days / leitner_h)
+
+        # --- MODEL 3: Half-Life Regression (Duolingo, 2016) ---
+    # This uses the specific weights YOU trained on the dataset earlier!
+
+    hlr_weight_correct = 0.0020
+    hlr_weight_wrong = -0.1891
+    hlr_bias = 7.3341
+
 def predict():
     data = request.json
     

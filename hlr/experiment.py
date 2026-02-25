@@ -301,6 +301,8 @@ if __name__ == "__main__":
     model.train(trainset)
     model.eval(testset, 'test')
 
+    print("evaluation finished")
+
     # write out model weights and predictions
     filebits = [args.method] + \
         [k for k, v in sorted(vars(args).items()) if v is True] + \
@@ -313,3 +315,4 @@ if __name__ == "__main__":
     model.dump_weights('results/'+filebase+'.weights')
     model.dump_predictions('results/'+filebase+'.preds', testset)
     model.dump_detailed_predictions('results/'+filebase+'.detailed', testset)
+    print("Finished")

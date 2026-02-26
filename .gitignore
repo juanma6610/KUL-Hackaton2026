@@ -4,6 +4,10 @@ data/*
 #Models         
 models/
 
+py_react_web/node_modules/
+py_react_web/client/node_modules/
+
+
 /task.md
 
 

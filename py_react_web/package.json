@@ -2,8 +2,8 @@
   "name": "kul-hackaton2026-web3",
   "version": "1.0.0",
   "scripts": {
-    "dev": "concurrently \"npm run server\" \"npm run client\"",
-    "server": "cd server && conda activate Datathlon && python server.py",
+    "dev": "concurrently \"npm run client\" \"npm run server\"",
+    "server": "cd server && conda activate kulhack && python server.py",
     "client": "cd client && npm run dev"
   },
   "devDependencies": {

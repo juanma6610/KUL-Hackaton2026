@@ -9,7 +9,7 @@ from pathlib import Path
 app = Flask(__name__)
 CORS(app)
 
-MODEL_PATH = Path(__file__).parent.parent.parent / "models" / "xgboost_baseline0.001.json"
+MODEL_PATH = Path(__file__).parent.parent.parent / "models" / "xgboost_full_features_no_word_len.json"
 model = xgb.XGBRegressor()
 model.load_model(str(MODEL_PATH))
 explainer = shap.TreeExplainer(model)

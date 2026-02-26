@@ -22,6 +22,19 @@ The project is organized into a modular package format for production-ready expe
 - **[`build_duo_data.py`](src/build_duo_data.py)**: Vectorized batch enricher for the full 13M row dataset.
 - **[`config.py`](src/config.py)**: Centralized configuration and file paths.
 
+### 🌐 Modern Web Interface (`py_react_web/`)
+A full-stack interactive dashboard for real-time memory prediction and user analytics.
+- **Server (Flask)**: High-performance API providing XGBoost predictions and SHAP explainability.
+- **Client (React)**: Duolingo-themed frontend with:
+    - **Memory Engine**: Interactive simulator for word recall probability.
+    - **Model Comparison**: Real-time visual comparison between XGBoost, Leitner, Pimsleur, and HLR.
+    - **User Stats**: Personalized analytics including practice distribution and weak category tracking.
+
+### 🧪 Research & Notebooks (`notebooks/`)
+Detailed experiments and mathematical modeling:
+- **`bayesian_forgetting.ipynb`**: Hierarchical Bayesian modeling of individual forgetting rates using PyMC.
+- **`xgboost.ipynb` / `ideas.ipynb`**: Feature engineering and model prototyping.
+
 ### 🏛️ Legacy & Research
 - **[`hlr/`](hlr/)**: Contains legacy Half-Life Regression scripts and evaluation utilities.
 - **[`eda/`](eda/)**: Notebooks for Exploratory Data Analysis.
@@ -85,7 +98,20 @@ python train.py data/SpacedRepetitionData.csv
 python train.py data/SpacedRepetitionData.csv --optuna --trials 100
 ```
 
-### 3. Launch the App
+### 3. Launch the Web App (Full Stack)
+**Backend:**
+```bash
+cd py_react_web/server
+python server.py
+```
+**Frontend:**
+```bash
+cd py_react_web/client
+npm install
+npm start
+```
+
+### 4. Alternative Demo (Streamlit)
 ```bash
 streamlit run app.py
 ```
@@ -94,10 +120,11 @@ streamlit run app.py
 
 ## 🧠 Model Methodology
 
-The engine uses a two-stage hybrid approach to model human memory decay:
+The engine uses a multi-stage hybrid approach to model human memory decay:
 
 1.  **Cognitive Stage (MCM)**: Simulates the underlying strength of a student's memory based on their practice history across multiple time scales.
 2.  **Machine Learning Stage (XGBoost)**: Refines the cognitive prediction by factoring in linguistic complexity, circadian rhythms, and global user performance.
+3.  **Bayesian Integration**: Research into hierarchical models to account for individual variance in forgetting (see `notebooks/bayesian_forgetting.ipynb`).
 
 ### Features Included
 -   **Cognitive**: MCM recall probability baseline.
@@ -119,3 +146,4 @@ The engine uses a two-stage hybrid approach to model human memory decay:
 ## 📜 Credits
 Developed for **KU Leuven MAI Hackathon 2026**.
 Based on the Duolingo Spaced Repetition Dataset.
+
